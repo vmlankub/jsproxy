@@ -2,7 +2,7 @@ jsproxy_config({
     // 当前配置的版本（记录在日志中，用于排查问题）
     // 每次修改配置，该值需要增加，否则不会生效。
     // 默认每隔 5 分钟自动下载配置，若想立即验证，可通过隐私模式访问。
-    ver: '120',
+    ver: '128',
 
     // 通过 CDN 加速常用网站的静态资源（实验中）
     static_boost: {
@@ -74,7 +74,26 @@ jsproxy_config({
     /**
      * 自定义注入页面的 HTML
      */
-    inject_html: '<script>window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;    ga(\'create\', \'UA-116309064-4\', { \'siteSpeedSampleRate\': 100, \'alwaysSendReferrer\': true });    ga(\'set\', \'forceSSL\', true);    ga(\'send\', \'pageview\');</script><script async src=\'https://www.google-analytics.com/analytics.js\'></script>',
+    inject_html: '\
+<script>\
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;\
+    ga(\'create\', \'UA-116309064-4\', { \'siteSpeedSampleRate\': 100, \'alwaysSendReferrer\': true });\
+    ga(\'set\', \'forceSSL\', true);\
+    ga(\'send\', \'pageview\');\
+</script>\
+<script async src=\'https://www.google-analytics.com/analytics.js\'></script>\
+<script>\
+    window.addEventListener(\'error\', function (err) {\
+        const line_and_column = err.colno ? \' line:\' + err.lineno + \', column:\' + err.colno : \' line:\' + err.lineno;\
+        ga(\'send\',\
+            {\
+                hitType: \'event\',\
+                eventCategory: \'JavaScript Error\',\
+                eventAction: err.message,\
+                eventLabel: `${navigator.userAgent} -> ${err.filename} @ ${line_and_column}`\
+            });\
+    });\
+</script>',
 
     /**
      * URL 自定义处理（设计中）
